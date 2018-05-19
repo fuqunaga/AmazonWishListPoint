@@ -26,11 +26,10 @@ var addPointsSection = (data_id_node) =>
 }
 
 
-var data_id_nodes = document.querySelectorAll("div[data-id]");
+var data_id_nodes = document.querySelectorAll("li[data-id]");
 data_id_nodes.forEach((data_id_node) => addPointsSection(data_id_node));
 
-
-var gitems = document.querySelector("div#g-items");
+var gitems = document.querySelector("ul#g-items");
  
 // オブザーバインスタンスを作成
 const observer = new MutationObserver((mutations) => {
