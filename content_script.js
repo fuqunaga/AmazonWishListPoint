@@ -1,6 +1,8 @@
 
 var addPointsSection = (data_id_node) => 
 {
+	if (data_id_node.nodeType != Node.ELEMENT_NODE) return;
+
 	var price_section = data_id_node.querySelector(".price-section");
 	if (price_section)
 	{
@@ -37,9 +39,7 @@ const observer = new MutationObserver((mutations) => {
 		var addedNodes = mutation.addedNodes;
 		if (addedNodes != null)
 		{
-			addedNodes.forEach((node) => {
-				addPointsSection(node)
-			});
+			addedNodes.forEach(addPointsSection);
 		}
 	});
 });    
