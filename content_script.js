@@ -1,16 +1,14 @@
-
-var addPointsSection = (data_id_node) => 
+var addPointsSection = (price_section_query, data_id_node) => 
 {
 	if (data_id_node.nodeType != Node.ELEMENT_NODE) return;
 
-	var price_section = data_id_node.querySelector(".price-section");
+	var price_section = data_id_node.querySelector(price_section_query);
 	if (price_section)
 	{
-		var id = price_section.querySelector("span").id.split("_")[1];
-		var link = document.querySelector("a#itemName_"+id).href
+		var link = data_id_node.querySelector("a[title]").href;
 
 		var xhr = new XMLHttpRequest();
-		xhr.onload = ((xhr, price_section, id) =>{
+		xhr.onload = ((xhr, price_section) =>{
 			var res_dom = xhr.responseXML;
 			if(res_dom != null)
 			{
@@ -19,7 +17,7 @@ var addPointsSection = (data_id_node) =>
 					price_section.appendChild(point);
 				}
 			}
-		}).bind(null, xhr, price_section, id);
+		}).bind(null, xhr, price_section);
 
 		xhr.open("GET", link);
 		xhr.responseType = "document";
@@ -27,22 +25,61 @@ var addPointsSection = (data_id_node) =>
 	}
 }
 
+class AddPointNode{
+	constructor(price_section_query)
+	{
+		this.price_section_query = price_section_query;
+	}
 
-var data_id_nodes = document.querySelectorAll("li[data-id]");
-data_id_nodes.forEach((data_id_node) => addPointsSection(data_id_node));
+	addNode(node)
+	{
+		addPointsSection(this.price_section_query, node);
+	}
+}
 
-var gitems = document.querySelector("ul#g-items");
- 
-// オブザーバインスタンスを作成
-const observer = new MutationObserver((mutations) => {
-	mutations.forEach((mutation) => {
-		var addedNodes = mutation.addedNodes;
-		if (addedNodes != null)
-		{
-			addedNodes.forEach(addPointsSection);
-		}
-	});
-});    
- 
-// 対象ノードとオブザーバの設定を渡す
-observer.observe(gitems, { childList:true});
+var observeItems = (items_query, price_section_query) =>
+{
+	var addNode = new AddPointNode(price_section_query);
+	var gitems = document.querySelector(items_query);
+	if (gitems)
+	{
+		var data_id_nodes = document.querySelectorAll("li[data-id]");
+		data_id_nodes.forEach((node) => addNode.addNode(node));
+		
+		// オブザーバインスタンスを作成
+		const itemObserver = new MutationObserver((mutations) => {
+			mutations.forEach((mutation) => {
+				var addedNodes = mutation.addedNodes;
+				if (addedNodes != null)
+				{
+					addedNodes.forEach((node) => addNode.addNode(node));
+				}
+			});
+		});    
+		
+		// 対象ノードとオブザーバの設定を渡す
+		itemObserver.observe(gitems, {childList:true});
+	}
+}
+
+
+var ObserveWishList = () =>
+{
+	// for list style
+	observeItems("ul#g-items", ".price-section");
+
+	// for grid style
+	observeItems("ul#g-items-grid", ".wl-grid-item-bottom-section");
+}
+
+// update current page
+ObserveWishList();
+
+
+// observe wishlist style
+var target = document.querySelector("div#item-page-wrapper > div");
+const observer = new MutationObserver(_ => {
+	console.log("hoge");
+	ObserveWishList();    
+});
+observer.observe(target, {childList:true});
