@@ -7,21 +7,20 @@ var addPointsSection = (price_section_query, data_id_node) =>
 	{
 		var link = data_id_node.querySelector("a[title]").href;
 
-		var xhr = new XMLHttpRequest();
-		xhr.onload = ((xhr, price_section) =>{
-			var res_dom = xhr.responseXML;
-			if(res_dom != null)
-			{
-				var point = res_dom.querySelector(".loyalty-points");
-				if ( point != null ){
-					price_section.appendChild(point);
+		fetch(link, {credentials: "omit"})
+			.then((response) => response.text())
+			.then((html) => {
+				var parser = new DOMParser();
+				var res_dom = parser.parseFromString(html, "text/html");
+				if(res_dom != null)
+				{
+					var point = res_dom.querySelector(".loyalty-points");
+					if (point != null) {
+						price_section.querySelectorAll("div")?.forEach((e) => e.remove());
+						price_section.appendChild(point);
+					}
 				}
-			}
-		}).bind(null, xhr, price_section);
-
-		xhr.open("GET", link);
-		xhr.responseType = "document";
-		xhr.send();
+			});
 	}
 }
 
@@ -79,7 +78,6 @@ ObserveWishList();
 // observe wishlist style
 var target = document.querySelector("div#item-page-wrapper > div");
 const observer = new MutationObserver(_ => {
-	console.log("hoge");
 	ObserveWishList();    
 });
 observer.observe(target, {childList:true});
